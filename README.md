@@ -38,13 +38,15 @@ mysql -u root -p kinougarde < sql/schema.sql
 mysql -u root -p kinougarde < sql/seed.sql
 ```
 
-Lancer le serveur intégré de PHP :
+Lancer le serveur intégré de PHP. **`-t public`** est important : il désigne
+`public/` comme racine web, de sorte que `src/`, `sql/` et le `.env` restent
+hors de portée d'une URL.
 
 ```bash
-php -S localhost:8000
+php -S localhost:8000 -t public
 ```
 
-Puis ouvrir <http://localhost:8000/home.php>.
+Puis ouvrir <http://localhost:8000/>.
 
 ### Comptes de démonstration
 
@@ -66,26 +68,52 @@ pas été republié.
 
 | Page | Rôle |
 |------|------|
-| `home.php` | Page d'accueil publique |
+| `index.php` | Page d'accueil publique |
 | `inscription-parents.php` · `inscription-nounou.php` | Création de compte |
 | `login.php` · `logout.php` | Authentification |
-| `dashboard_parent.php` | Informations du parent et fiches de ses enfants |
-| `dashboard_nounou.php` | Contrats, montant dû, messages reçus |
+| `dashboard-parent.php` | Informations du parent et fiches de ses enfants |
+| `dashboard-nounou.php` | Contrats, montant dû, messages reçus |
 | `mon-enfant.php` · `modifier-enfant.php` | Gestion des fiches enfants |
-| `liste_nounous.php` · `profil-nounou.php` | Recherche de nounou |
+| `liste-nounous.php` · `profil-nounou.php` | Recherche de nounou |
 | `messages.php?avec=<id>` | Conversation entre deux comptes |
 
 ## 🧱 Structure
 
 ```
-config.php     # connexion PDO, lecture du .env
-auth.php       # session, contrôle d'accès, échappement, jeton CSRF
-functions.php  # requêtes métier (profils, enfants, contrats, messages)
+public/                    # racine web — le seul dossier exposé par le serveur
+  index.php                # accueil
+  login.php  logout.php
+  inscription-parents.php  inscription-nounou.php
+  dashboard-parent.php     dashboard-nounou.php
+  mon-enfant.php           modifier-enfant.php
+  liste-nounous.php        profil-nounou.php
+  messages.php
+  assets/
+    css/                   # base.css + une feuille par page
+    js/                    # menu.js, liste-nounous.js
+src/                       # hors racine web
+  bootstrap.php            # amorçage : charge les trois fichiers ci-dessous
+  config.php               # connexion PDO, lecture du .env
+  auth.php                 # session, contrôle d'accès, échappement, jeton CSRF
+  functions.php            # requêtes métier (profils, enfants, contrats, messages)
 sql/
-  schema.sql   # structure des tables
-  seed.sql     # jeu de démonstration fictif
-*.php          # les pages
-*.css          # une feuille de style par page
+  schema.sql               # structure des tables
+  seed.sql                 # jeu de démonstration fictif
+.env                       # identifiants MySQL — ignoré par git
+```
+
+Tout partait de la racine : les pages, les feuilles de style, la connexion à la
+base et le dump SQL, dans un seul dossier de trente fichiers. Le découpage
+`public/` · `src/` n'est pas qu'une affaire de rangement : avec `-t public`,
+une URL ne peut plus désigner `config.php`, `.env` ni `sql/`. Si le serveur
+cessait un jour d'interpréter le PHP — mauvaise configuration, module désactivé
+— `config.php` serait renvoyé en texte brut, mot de passe de la base compris.
+Hors racine web, il n'a pas d'URL du tout.
+
+Chaque page commence donc par une seule ligne :
+
+```php
+require_once __DIR__ . '/../src/bootstrap.php';
 ```
 
 ## 🔍 Ce que la relecture a révélé
@@ -172,6 +200,27 @@ Plusieurs pages affichaient « Inscription réussie ! » **avant** de rediriger.
 tout affichage envoie les en-têtes : la redirection qui suit est ignorée et
 un avertissement s'affiche.
 
+### 9. Le bouton ☰ du tableau de bord nounou n'ouvrait rien
+
+La page affichait **deux menus identiques** : un `<nav>` visible et un
+`<div class="menu">` que sa feuille de style posait en `display: none`. Le
+bouton basculait bien la classe `.open`, mais aucune règle ne repassait
+l'élément en `block` : il restait masqué. Les deux menus n'en font plus qu'un.
+
+Dans le même esprit, la fonction `toggleMenu()` était recopiée à l'identique
+dans trois pages, appelée par un `onclick` en attribut. Elle vit maintenant
+dans `assets/js/menu.js`, écrite une fois — et referme le menu avec Échap.
+
+### 10. Des feuilles de style qui décrivaient une page inexistante
+
+`message.css` stylait `#chat-box`, `.message .sender`, `.message .date` : le
+balisage de l'interface AJAX qui n'a jamais été terminée. Aucun de ces
+sélecteurs ne correspondait à ce que la page produisait réellement.
+
+Symétriquement, quatre feuilles chargeaient un fond `url('style/pexel (2).jpg')`
+— une image absente du dépôt. Et la classe `erreur`, émise par six pages, n'était
+définie nulle part : les messages d'erreur s'affichaient en texte ordinaire.
+
 ## 🛡️ Ce qui a été ajouté
 
 - **Jeton CSRF** sur tous les formulaires. Sans lui, un formulaire hébergé ailleurs
@@ -182,6 +231,8 @@ un avertissement s'affiche.
   passe incorrect » revient à confirmer, adresse par adresse, qui est inscrit.
 - **Transactions** à l'inscription : compte et profil sont créés ensemble ou pas du tout.
 - Contrainte d'**unicité sur l'e-mail**, absente du schéma d'origine.
+- **Séparation `public/` · `src/`** : le code sensible n'est plus atteignable
+  par une URL (voir [Structure](#-structure)).
 
 ## ⚠️ Limites connues
 

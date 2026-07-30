@@ -1,0 +1,59 @@
+/* Tableau de bord parent.
+   Ces règles étaient écrites dans un <style> au milieu de dashboard_parent.php,
+   en doublon partiel de parents.css que la même page chargeait juste au-dessus. */
+
+body {
+    margin: 50px auto;
+    background: #555;
+}
+
+header,
+footer,
+.menu {
+    background-color: rgba(255, 255, 255, .1);
+    backdrop-filter: blur(10px);
+    color: #fff;
+}
+
+header {
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h1,
+p {
+    text-align: center;
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+.container {
+    max-width: 700px;
+    margin: 50px auto;
+    background-color: rgba(0, 0, 0, .35);
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, .1);
+}
+
+.container a {
+    color: #9ecbff;
+}
+
+section {
+    padding: 20px;
+}
+
+footer {
+    text-align: center;
+    padding: 20px 0;
+    min-height: 50px;
+}
+
+footer p {
+    margin: 0;
+}

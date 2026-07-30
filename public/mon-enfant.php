@@ -1,7 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/../src/bootstrap.php';
 
 $moi    = exiger_connexion('parent');
 $parent = parent_par_utilisateur($bdd, (int) $moi['id']);
@@ -53,14 +52,15 @@ $enfants = enfants_du_parent($bdd, (int) $parent['id']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mes enfants — <?= e(APP_NOM) ?></title>
-    <link rel="stylesheet" href="mon-enfant.css">
+    <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/mon-enfant.css">
 </head>
 <body>
 <header>
     <nav>
         <ul>
-            <li><a href="dashboard_parent.php">Mon profil</a></li>
-            <li><a href="home.php">Accueil</a></li>
+            <li><a href="dashboard-parent.php">Mon profil</a></li>
+            <li><a href="index.php">Accueil</a></li>
             <li><a href="logout.php">Déconnexion</a></li>
         </ul>
     </nav>
@@ -119,7 +119,7 @@ $enfants = enfants_du_parent($bdd, (int) $parent['id']);
 </section>
 
 <footer>
-    <a href="dashboard_parent.php">Retour au tableau de bord</a>
+    <a href="dashboard-parent.php">Retour au tableau de bord</a>
 </footer>
 </body>
 </html>

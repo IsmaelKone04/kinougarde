@@ -1,7 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/../src/bootstrap.php';
 
 // L'ancienne version n'exigeait aucune connexion et construisait la requête
 // par concaténation : profil-nounou.php?id=0 UNION SELECT … suffisait à lire
@@ -10,7 +9,7 @@ exiger_connexion();
 
 $nounou_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if ($nounou_id === false || $nounou_id === null) {
-    header('Location: liste_nounous.php');
+    header('Location: liste-nounous.php');
     exit;
 }
 
@@ -26,11 +25,12 @@ if ($nounou === null) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profil nounou — <?= e(APP_NOM) ?></title>
-    <link rel="stylesheet" href="profil_nounou.css">
+    <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/profil-nounou.css">
 </head>
 <body>
 
-<p><a href="liste_nounous.php">&larr; Retour à la liste</a></p>
+<p><a href="liste-nounous.php">&larr; Retour à la liste</a></p>
 
 <?php if (!empty($introuvable)): ?>
     <p>Aucun profil de nounou ne correspond à cet identifiant.</p>

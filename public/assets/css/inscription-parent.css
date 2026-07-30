@@ -1,7 +1,6 @@
-body{
-    background: url('style/pexel (2).jpg');
-    background-size: cover;
-}
+/* Le fond de page vient de base.css : l'`url('style/pexel (2).jpg')` d'origine
+   désignait une image absente du dépôt. */
+
 .container {
     display: flex;
     flex-direction: column;

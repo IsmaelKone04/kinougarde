@@ -12,8 +12,7 @@
  */
 
 declare(strict_types=1);
-require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/../src/bootstrap.php';
 
 $moi    = exiger_connexion('parent');
 $parent = parent_par_utilisateur($bdd, (int) $moi['id']);
@@ -84,14 +83,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_child'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modifier une fiche — <?= e(APP_NOM) ?></title>
-    <link rel="stylesheet" href="modifier.css">
+    <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/modifier-enfant.css">
 </head>
 <body>
 <header>
     <nav>
         <ul>
             <li><a href="mon-enfant.php">Mes enfants</a></li>
-            <li><a href="home.php">Accueil</a></li>
+            <li><a href="index.php">Accueil</a></li>
             <li><a href="logout.php">Déconnexion</a></li>
         </ul>
     </nav>

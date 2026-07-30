@@ -9,8 +9,7 @@
  */
 
 declare(strict_types=1);
-require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/../src/bootstrap.php';
 
 $moi = exiger_connexion();
 
@@ -44,7 +43,7 @@ $req->execute([$avec]);
 $interlocuteur = $req->fetch();
 
 $messages = conversation($bdd, (int) $moi['id'], $avec);
-$retour   = $moi['role'] === 'nounou' ? 'dashboard_nounou.php' : 'dashboard_parent.php';
+$retour   = $moi['role'] === 'nounou' ? 'dashboard-nounou.php' : 'dashboard-parent.php';
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -52,7 +51,8 @@ $retour   = $moi['role'] === 'nounou' ? 'dashboard_nounou.php' : 'dashboard_pare
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Messagerie — <?= e(APP_NOM) ?></title>
-    <link rel="stylesheet" href="message.css">
+    <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/messages.css">
 </head>
 <body>
 

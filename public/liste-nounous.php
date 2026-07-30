@@ -1,7 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/../src/bootstrap.php';
 
 exiger_connexion();
 
@@ -13,11 +12,13 @@ $nounous = lister_nounous($bdd);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nounous disponibles — <?= e(APP_NOM) ?></title>
-    <link rel="stylesheet" href="liste_nounous.css">
+    <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/liste-nounous.css">
+    <script src="assets/js/liste-nounous.js" defer></script>
 </head>
 <body>
 
-<p><a href="dashboard_parent.php">&larr; Retour au tableau de bord</a></p>
+<p><a href="dashboard-parent.php">&larr; Retour au tableau de bord</a></p>
 <h1>Nounous disponibles</h1>
 
 <?php if (!$nounous): ?>
@@ -38,14 +39,5 @@ $nounous = lister_nounous($bdd);
     <?php endforeach; ?>
 <?php endif; ?>
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".profile").forEach(function (profile, index) {
-        setTimeout(function () {
-            profile.classList.add("show");
-        }, index * 150);
-    });
-});
-</script>
 </body>
 </html>

@@ -1,7 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/../src/bootstrap.php';
 
 $moi = exiger_connexion('nounou');
 
@@ -34,24 +33,23 @@ $messages = $derniers->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tableau de bord nounou — <?= e(APP_NOM) ?></title>
-    <link rel="stylesheet" href="dashboard_nounou.css">
+    <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/dashboard-nounou.css">
+    <script src="assets/js/menu.js" defer></script>
 </head>
 <body>
 <header>
-    <button class="menu-toggle" onclick="toggleMenu()">☰ Menu</button>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="menu">☰ Menu</button>
 </header>
-<nav>
+<!-- Un seul menu. La page en affichait deux, identiques : un <nav> visible et
+     un .menu que la feuille de style masquait par display: none — si bien que
+     le bouton ☰ ne pouvait rien ouvrir. -->
+<nav class="menu" id="menu">
     <ul>
-        <li><a href="home.php">Accueil</a></li>
+        <li><a href="index.php">Accueil</a></li>
         <li><a href="logout.php">Déconnexion</a></li>
     </ul>
 </nav>
-<div class="menu" id="menu">
-    <ul>
-        <li><a href="home.php">Accueil</a></li>
-        <li><a href="logout.php">Déconnexion</a></li>
-    </ul>
-</div>
 
 <div class="container">
     <h2>Tableau de bord</h2>
@@ -101,11 +99,5 @@ $messages = $derniers->fetchAll();
     <p><?= e(APP_NOM) ?> — trouvez la garde d'enfants qu'il vous faut.</p>
     <p>&copy; 2024 <?= e(APP_NOM) ?>. Projet étudiant, à but non commercial.</p>
 </footer>
-
-<script>
-    function toggleMenu() {
-        document.getElementById("menu").classList.toggle("open");
-    }
-</script>
 </body>
 </html>

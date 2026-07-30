@@ -2,8 +2,8 @@
 /**
  * Connexion à la base de données et réglages généraux.
  *
- * Point d'entrée unique : tous les autres fichiers font `require_once 'config.php'`
- * et utilisent la variable $bdd. Auparavant, les identifiants MySQL étaient
+ * Chargé par `bootstrap.php`, jamais directement : les pages utilisent la
+ * variable $bdd qu'il expose. Auparavant, les identifiants MySQL étaient
  * recopiés en dur dans une dizaine de fichiers ; il suffisait d'en oublier un
  * pour publier un mot de passe de production.
  */
@@ -26,7 +26,9 @@ function charger_env(string $chemin): void
     }
 }
 
-charger_env(__DIR__ . '/.env');
+// Le .env est à la racine du projet, un cran au-dessus de src/ — et donc
+// deux crans au-dessus de la racine web : il n'est servable par aucune URL.
+charger_env(dirname(__DIR__) . '/.env');
 
 function env(string $cle, string $defaut = ''): string
 {

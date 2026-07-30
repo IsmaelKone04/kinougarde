@@ -1,0 +1,97 @@
+/* Socle commun à toutes les pages.
+ *
+ * Chargé en premier, avant la feuille propre à chaque page. Il regroupe ce qui
+ * était jusqu'ici recopié dans plusieurs fichiers — ou nulle part, comme les
+ * messages d'erreur : les pages émettaient déjà class="erreur" sans qu'aucune
+ * règle ne l'ait jamais défini.
+ */
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.5;
+    color: #333;
+    /* Les feuilles d'origine pointaient toutes vers `style/pexel (2).jpg`,
+       une image absente du dépôt : le fond ne s'affichait jamais. */
+    background: linear-gradient(160deg, #1e3a5f 0%, #2f5d8c 55%, #4a7fb5 100%) fixed;
+    min-height: 100vh;
+}
+
+a {
+    color: #007bff;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* --- Menu latéral, partagé par l'accueil et les deux tableaux de bord ----- */
+
+.menu {
+    position: fixed;
+    top: 0;
+    right: -250px;          /* hors écran par défaut */
+    width: 250px;
+    height: 100%;
+    background-color: #333;
+    transition: right .3s ease;
+    z-index: 1000;
+    padding-top: 60px;
+}
+
+.menu.open {
+    right: 0;
+}
+
+.menu ul {
+    list-style: none;
+}
+
+.menu ul li {
+    padding: 15px;
+    border-bottom: 1px solid #555;
+}
+
+.menu ul li:hover {
+    background-color: #555;
+}
+
+.menu ul li a,
+.menu ul li label {
+    color: #fff;
+    text-decoration: none;
+}
+
+.menu-toggle {
+    display: block;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* --- Messages d'erreur --------------------------------------------------- */
+
+.erreur {
+    background-color: #fdecea;
+    border-left: 4px solid #d93025;
+    color: #a32018;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    border-radius: 4px;
+    list-style-position: inside;
+}
+
+.erreur li + li {
+    margin-top: 4px;
+}

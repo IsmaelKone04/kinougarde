@@ -1,16 +1,10 @@
-body{
-    background: url('style/pexel (2).jpg');
-    background-size: cover;
-    background-repeat: no-repeat;
-    margin: 0;
-    padding: 0;
-}
+/* Le fond de page est défini dans base.css. Les deux `url('style/pexel …jpg')`
+   d'origine désignaient des images absentes du dépôt. */
+
 .container {
-    background: url('style/pexel (4).jpg');
-    background-size: cover;
     max-width: 400px;
     margin: 50px auto;
-    background-color: #fff;
+    background-color: rgba(255, 255, 255, .95);
     padding: 20px;
     border-radius: 5px;
     box-shadow: 0 0 10px 0px rgba(0, 0, 0, 0.1);

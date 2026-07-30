@@ -5,7 +5,7 @@
 /vendor/
 
 # Televersements des utilisateurs (photos de profil)
-/uploads/
+/public/uploads/
 
 # IDE
 .idea/

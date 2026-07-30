@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/../src/bootstrap.php';
 
 $erreurs  = [];
 $sexes    = ['femme', 'homme', 'autre'];
@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $bdd->commit();
 
             connecter($utilisateur_id, 'nounou', $email);
-            header('Location: dashboard_nounou.php');
+            header('Location: dashboard-nounou.php');
             exit;
         } catch (PDOException $e) {
             $bdd->rollBack();
@@ -90,7 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscription nounou — <?= e(APP_NOM) ?></title>
-    <link rel="stylesheet" href="nounou.css">
+    <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/inscription-nounou.css">
 </head>
 <body>
     <div class="container">
