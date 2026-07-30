@@ -1,0 +1,46 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f7f7f7;
+    margin: 0;
+    padding: 20px;
+}
+
+.profile {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+    max-width: 400px; /* Nouvelle ligne pour définir la largeur maximale */
+    margin: 0 auto; /* Nouvelle ligne pour centrer le rectangle */
+    transition: opacity 0.5s ease; /* Ajoutez une transition pour l'opacité */
+    opacity: 0; /* Définissez l'opacité initiale à 0 pour masquer le profil */
+}
+/* Ajoutez ces nouvelles règles CSS à votre feuille de style */
+
+
+.profile.show {
+    opacity: 1; /* Affichez le profil avec une transition fluide */
+}
+
+
+.profile h3 {
+    color: #333;
+    margin-bottom: 10px;
+    text-align: center; /* Nouvelle ligne pour centrer le texte */
+}
+
+.profile p {
+    color: #666;
+    margin: 5px 0;
+    text-align: center; /* Nouvelle ligne pour centrer le texte */
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}

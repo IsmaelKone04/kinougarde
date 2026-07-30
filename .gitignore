@@ -1,0 +1,20 @@
+# Variables d'environnement (identifiants de base de donnees)
+.env
+
+# Dependances
+/vendor/
+
+# Televersements des utilisateurs (photos de profil)
+/uploads/
+
+# IDE
+.idea/
+.vscode/
+
+# Systeme
+.DS_Store
+Thumbs.db
+
+# Sauvegardes et dumps locaux
+*.local.sql
+*.log

@@ -1,0 +1,24 @@
+body{
+  color: white;
+}
+#chat-box {
+    width: 300px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+#chat {
+    height: 200px;
+    overflow-y: scroll;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+
+#message {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+button {
+    width: 100%;
+}
