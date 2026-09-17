@@ -1,46 +1,77 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f7f7f7;
-    margin: 0;
-    padding: 20px;
+/* Grille de profils. L'ancienne version empilait les fiches en une seule
+   colonne à `max-width: 400px`, et un `margin: 0 auto` écrivait juste après
+   `margin-bottom: 20px` sur le même sélecteur — la seconde déclaration
+   annulait la première, si bien que les cartes se touchaient verticalement. */
+
+.filtres-nounou {
+    margin-bottom: 1.5rem;
+}
+
+.filtres-nounou .field-row {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 700px) {
+    .filtres-nounou .field-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.nounou-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
 }
 
 .profile {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    margin-bottom: 20px;
-    max-width: 400px; /* Nouvelle ligne pour définir la largeur maximale */
-    margin: 0 auto; /* Nouvelle ligne pour centrer le rectangle */
-    transition: opacity 0.5s ease; /* Ajoutez une transition pour l'opacité */
-    opacity: 0; /* Définissez l'opacité initiale à 0 pour masquer le profil */
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: 1.75rem 1.25rem;
+    text-align: center;
+    transition: opacity .5s ease, transform .2s ease, box-shadow .2s ease;
+    opacity: 0; /* affiché par liste-nounous.js, avec repli si le script échoue */
 }
-/* Ajoutez ces nouvelles règles CSS à votre feuille de style */
-
 
 .profile.show {
-    opacity: 1; /* Affichez le profil avec une transition fluide */
+    opacity: 1;
 }
 
+.profile:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.profile .avatar {
+    margin: 0 auto .9rem;
+}
 
 .profile h3 {
-    color: #333;
-    margin-bottom: 10px;
-    text-align: center; /* Nouvelle ligne pour centrer le texte */
+    margin-bottom: .3rem;
+    font-size: 1.05rem;
 }
 
-.profile p {
-    color: #666;
-    margin: 5px 0;
-    text-align: center; /* Nouvelle ligne pour centrer le texte */
+.profile-ville {
+    color: var(--color-text-muted);
+    font-size: .88rem;
+    margin-bottom: .3rem;
 }
 
-a {
-    color: #007bff;
-    text-decoration: none;
+.profile-detail {
+    color: var(--color-text-muted);
+    font-size: .82rem;
+    margin-bottom: .3rem;
 }
 
-a:hover {
-    text-decoration: underline;
+.profile-detail:last-of-type {
+    margin-bottom: .9rem;
+}
+
+.profile-badges {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .4rem;
+    margin-bottom: 1.1rem;
 }

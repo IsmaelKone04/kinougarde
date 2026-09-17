@@ -6,18 +6,18 @@
  * HTML réellement émis par messages.php.
  */
 
-body {
-    background: #f7f7f7;
-    padding: 20px;
+.conversation-header {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    margin: .5rem 0 1.5rem;
 }
 
-h1 {
+.conversation-header h1 {
     font-size: 1.4rem;
-    margin: 10px 0 20px;
 }
 
 #messages {
-    max-width: 700px;
     margin-bottom: 20px;
 }
 
@@ -49,30 +49,5 @@ h1 {
     color: #666;
 }
 
-form {
-    max-width: 700px;
-}
-
-textarea {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-family: inherit;
-    font-size: 1rem;
-}
-
-button[type="submit"] {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-}
-
-button[type="submit"]:hover {
-    background-color: #0056b3;
-}
+/* Le formulaire d'envoi (textarea + bouton) reprend le style commun de
+   base.css : mêmes champs, même bouton indigo arrondi que le reste du site. */

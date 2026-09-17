@@ -20,19 +20,25 @@ INSERT INTO `parents` (`id`, `utilisateur_id`, `ville`, `profession`, `nb_enfant
 (1, 1, 'Cocody',     'Comptable',  2),
 (2, 2, 'Port-Bouët', 'Enseignant', 1);
 
-INSERT INTO `nounous` (`id`, `utilisateur_id`, `sexe`, `ville`, `type_service`, `horaires`, `montant`, `paiement`, `photo_profil`) VALUES
-(1, 3, 'femme', 'Cocody',     'Garde d''enfants',            'Lun-Ven, 7h-18h',  120000.00, 'mois',  NULL),
-(2, 4, 'femme', 'Yopougon',   'Garde d''enfants et ménage',  'Lun-Sam, 8h-17h',   90000.00, 'mois',  NULL),
-(3, 5, 'homme', 'Port-Bouët', 'Aide aux devoirs',            'Mer et Sam, 14h-18h', 3000.00, 'heure', NULL);
+INSERT INTO `nounous` (`id`, `utilisateur_id`, `sexe`, `ville`, `type_service`, `horaires`, `montant`, `paiement`, `photo_profil`, `verifiee`) VALUES
+(1, 3, 'femme', 'Cocody',     'Garde d''enfants',            'Lun-Ven, 7h-18h',  120000.00, 'mois',  NULL, 1),
+(2, 4, 'femme', 'Yopougon',   'Garde d''enfants et ménage',  'Lun-Sam, 8h-17h',   90000.00, 'mois',  NULL, 0),
+(3, 5, 'homme', 'Port-Bouët', 'Aide aux devoirs',            'Mer et Sam, 14h-18h', 3000.00, 'heure', NULL, 0);
 
 INSERT INTO `enfants` (`id`, `parent_id`, `nom`, `prenom`, `age`, `allergie`, `besoin_specifique`) VALUES
 (1, 1, 'Traoré', 'Awa',    4, 'Arachide',  'Sieste obligatoire après le déjeuner'),
 (2, 1, 'Traoré', 'Yao',    7, NULL,        'Accompagnement aux devoirs de lecture'),
 (3, 2, 'Bamba',  'Mariam', 2, 'Lait de vache', 'Biberon toutes les trois heures');
 
-INSERT INTO `contrats_emploi` (`id`, `parent_id`, `nounou_id`, `titre`, `montant`) VALUES
-(1, 1, 1, 'Garde à domicile — année scolaire', 120000.00),
-(2, 2, 3, 'Aide aux devoirs — trimestre',       48000.00);
+-- Statuts variés pour illustrer le cycle complet : un contrat terminé (avec
+-- son avis ci-dessous), un accepté en cours, un encore en attente de réponse.
+INSERT INTO `contrats_emploi` (`id`, `parent_id`, `nounou_id`, `titre`, `montant`, `statut`) VALUES
+(1, 1, 1, 'Garde à domicile — année scolaire 2025', 120000.00, 'terminee'),
+(2, 2, 3, 'Aide aux devoirs — trimestre',            48000.00, 'acceptee'),
+(3, 1, 2, 'Garde ponctuelle — vacances scolaires',    60000.00, 'en_attente');
+
+INSERT INTO `avis` (`contrat_id`, `parent_id`, `nounou_id`, `note`, `commentaire`) VALUES
+(1, 1, 1, 5, 'Adjoua a été formidable avec Awa toute l''année, très à l''écoute.');
 
 INSERT INTO `messages` (`expediteur_id`, `destinataire_id`, `contenu`) VALUES
 (1, 3, 'Bonjour, seriez-vous disponible dès lundi prochain ?'),

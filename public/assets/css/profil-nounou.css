@@ -1,49 +1,48 @@
-/* Styles pour le profil détaillé d'une nounou */
-
-.container {
-    width: 80%;
-    margin: 0 auto;
-}
+/* Profil détaillé d'une nounou. */
 
 .profile-details {
-    background-color: #f9f9f9;
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 5px;
+    text-align: center;
 }
 
-.profile-details h2 {
-    color: #333;
+.profile-details .avatar {
+    margin: 0 auto 1rem;
 }
 
-.profile-details p {
-    margin: 5px 0;
-    color: #666;
+.profile-details .profile-ville {
+    color: var(--color-text-muted);
+    margin-bottom: 1rem;
+}
+
+.profile-details .profile-badges {
+    display: flex;
+    justify-content: center;
+    gap: .5rem;
+    margin-bottom: 1.5rem;
+}
+
+.profile-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    text-align: left;
+    background: var(--color-bg);
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.profile-info dt {
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: var(--color-text-muted);
+    font-weight: 700;
+}
+
+.profile-info dd {
+    font-weight: 600;
 }
 
 .message-form {
-    margin-top: 20px;
+    text-decoration: none;
 }
-
-.message-form textarea {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
-
-.message-form button {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.message-form button:hover {
-    background-color: #0056b3;
-}
-
-

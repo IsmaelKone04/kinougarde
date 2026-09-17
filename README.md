@@ -11,9 +11,11 @@ interne entre les deux parties, et suivi des contrats.
 ## 📌 Contexte
 
 Projet d'école réalisé en **avril 2024**, en PHP « nu » : pas de framework, pas de
-Composer, pas de moteur de templates. L'objectif du module était de comprendre ce que
-Laravel ou Symfony font à votre place — routage, requêtes préparées, sessions,
-hachage des mots de passe — en l'écrivant soi-même.
+moteur de templates. L'objectif du module était de comprendre ce que Laravel ou
+Symfony font à votre place — routage, requêtes préparées, sessions, hachage des mots
+de passe — en l'écrivant soi-même. L'application elle-même n'a toujours aucune
+dépendance ; Composer n'intervient que côté développement, pour les tests
+automatisés (voir [🧪 Tests](#-tests)).
 
 Le dépôt a été **repris et corrigé en juillet 2026** avant publication. La section
 [Ce que la relecture a révélé](#-ce-que-la-relecture-a-révélé) détaille ce qui n'allait
@@ -47,6 +49,40 @@ php -S localhost:8000 -t public
 ```
 
 Puis ouvrir <http://localhost:8000/>.
+
+### Avec Docker
+
+Alternative sans installer PHP/MySQL en local :
+
+```bash
+docker compose up --build
+```
+
+Charge automatiquement le schéma **et** les données de démonstration au
+premier démarrage (volume MySQL vide), puis sert l'application sur
+<http://127.0.0.1:8010/>. `docker compose down -v` repart de zéro.
+
+## 🧪 Tests
+
+Tests PHPUnit sur les fonctions les plus sensibles : contrôle d'accès aux fiches
+enfants (régression sur la faille IDOR corrigée en juillet 2026), anti-bruteforce,
+réinitialisation de mot de passe, validation des téléversements, avatars.
+
+Nécessite une base **séparée** de celle de développement, jamais réutilisée : les
+tests vident leurs tables avant chaque exécution.
+
+```bash
+composer install
+
+mysql -u root -p -e "CREATE DATABASE kinougarde_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root -p kinougarde_test < sql/schema.sql
+
+composer test
+```
+
+Exécutés automatiquement à chaque push par GitHub Actions
+(`.github/workflows/tests.yml`), contre un vrai MySQL de service — pas de
+mock de la base.
 
 ### Comptes de démonstration
 
@@ -234,15 +270,74 @@ définie nulle part : les messages d'erreur s'affichaient en texte ordinaire.
 - **Séparation `public/` · `src/`** : le code sensible n'est plus atteignable
   par une URL (voir [Structure](#-structure)).
 
+## 🎨 Refonte de l'interface et durcissement (septembre 2026)
+
+Le projet fonctionnait mais l'interface d'origine mélangeait douze feuilles CSS
+sans système commun (couleurs et polices différentes d'une page à l'autre),
+n'affichait jamais la photo d'une nounou (le champ existait, aucun formulaire
+ne permettait de la téléverser) et la connexion n'avait aucune limite de
+tentatives. Repris avec un vrai audit sécurité + UI/UX :
+
+- **Système de design commun** (`assets/css/base.css`) : palette, typographie,
+  boutons, cartes, avatars (photo réelle ou initiales colorées en repli).
+- **Sidebar** de navigation sur toutes les pages connectées (tiroir en mobile,
+  fixe en desktop), remplaçant un menu hamburger incohérent d'une page à l'autre.
+- **Téléversement de photo de profil** pour les nounous, avec validation réelle
+  du type d'image (`getimagesize()`, pas la seule extension déclarée) et nom de
+  fichier régénéré aléatoirement.
+- **Anti-bruteforce sur la connexion** : blocage après 5 échecs / 15 min par
+  e-mail (table `tentatives_connexion`).
+- **Réinitialisation de mot de passe** par jeton à usage unique, valable 30 min,
+  empreinte SHA-256 stockée plutôt que le jeton lui-même. Aucun serveur SMTP
+  configuré sur ce projet : le lien est affiché à l'écran plutôt qu'envoyé par
+  e-mail (voir `mot-de-passe-oublie.php`) — en production, il faudrait le
+  remplacer par un envoi réel.
+- **Bornage serveur** de tous les champs texte (longueur) et numériques
+  (nombre d'enfants, tarif) : le HTML seul ne protégeait pas contre un POST
+  direct hors limites.
+- **En-têtes de sécurité** (`X-Frame-Options`, `X-Content-Type-Options`,
+  `Referrer-Policy`, `Strict-Transport-Security` si servi en HTTPS) et dossier
+  `uploads/` protégé contre la liste de son contenu.
+
+### Vrai flux de contrat, avis et messagerie restreinte
+
+- **Cycle de vie complet d'un contrat** : `en_attente` → `acceptee`/`refusee`
+  (choix de la nounou) → `terminee` (choix du parent), au lieu de lignes
+  figées uniquement présentes dans les données de démonstration.
+- **Avis et notes** (`avis`) : un avis par contrat, possible uniquement une
+  fois le contrat `terminee` et jamais deux fois — note moyenne affichée sur
+  la liste et la fiche de chaque nounou.
+- **Recherche et filtres** (ville, service, tarif maximum) sur la liste des
+  nounous, en GET pour rester partageable.
+- **Modification de son propre profil** pour une nounou (ville, service,
+  horaires, tarif, photo).
+- **Messagerie restreinte** aux échanges parent ↔ nounou (un parent ne
+  pouvait plus écrire à un autre parent).
+- **Badge de messages non lus** dans la sidebar : ce projet n'a aucun serveur
+  SMTP configuré (voir ci-dessus), donc pas de notification par e-mail
+  possible à la réception d'un message ; ce badge en tient lieu.
+
+### Mode sombre, pagination, export et badge « vérifiée »
+
+- **Mode sombre** : suit la préférence système (`prefers-color-scheme`) ou un
+  choix explicite via le bouton de la sidebar, mémorisé dans `localStorage`.
+- **Pagination** de la liste des nounous (9 par page).
+- **Export CSV** de ses propres contrats, pour un parent comme pour une
+  nounou (`export-contrats.php`).
+- **Badge « Vérifiée »** (`nounous.verifiee`) affiché sur la liste et la
+  fiche d'une nounou. Il n'existe pas encore de back-office admin pour
+  l'activer : c'est aujourd'hui une bascule manuelle en base de données, pas
+  un vrai processus de vérification d'identité.
+
 ## ⚠️ Limites connues
 
 - **Jamais mis en service.** Aucun utilisateur réel, aucune donnée réelle.
 - **Pas de framework, donc pas de routeur** : les URL sont des noms de fichiers.
-- **Pas de tests automatisés.**
-- **Pas de téléversement de photo** : le champ `photo_profil` existe, le formulaire non.
-- **Pas de réinitialisation de mot de passe**, pas de vérification d'e-mail.
-- **Aucune vérification d'identité des nounous**, ce qu'exigerait une vraie plateforme
-  de garde d'enfants.
+- **Réinitialisation de mot de passe sans e-mail réel** (voir ci-dessus) : correct
+  pour une démo locale, à corriger avant toute mise en production.
+- **Pas de vraie vérification d'identité des nounous** : le badge « Vérifiée »
+  existe (voir ci-dessus) mais se bascule à la main en base, faute d'un
+  back-office admin — ce qu'exigerait une vraie plateforme de garde d'enfants.
 - La messagerie recharge la page à chaque envoi (le sondage AJAX d'origine a été retiré
   avec le code qu'il appelait).
 

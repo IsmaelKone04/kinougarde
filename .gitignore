@@ -4,8 +4,10 @@
 # Dependances
 /vendor/
 
-# Televersements des utilisateurs (photos de profil)
-/public/uploads/
+# Televersements des utilisateurs (photos de profil) : tout le contenu est
+# ignore, sauf le garde-fou qui bloque la liste du dossier.
+/public/uploads/*
+!/public/uploads/index.php
 
 # IDE
 .idea/
@@ -18,3 +20,7 @@ Thumbs.db
 # Sauvegardes et dumps locaux
 *.local.sql
 *.log
+
+# PHPUnit
+.phpunit.result.cache
+/tests/.env.testing

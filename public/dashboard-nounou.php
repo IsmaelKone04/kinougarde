@@ -10,11 +10,32 @@ if ($nounou === null) {
     exit('Profil nounou introuvable pour ce compte.');
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reponse_contrat'])) {
+    verifier_csrf();
+    repondre_contrat(
+        $bdd,
+        (int) $_POST['contrat_id'],
+        (int) $nounou['id'],
+        $_POST['reponse_contrat'] === 'accepter'
+    );
+    header('Location: dashboard-nounou.php');
+    exit;
+}
+
 // L'ancienne version faisait get_nounou_info() qui ne retournait que le nom et
 // l'e-mail, puis passait $nounou_info['id'] — une clé absente du tableau — à
 // toutes les requêtes suivantes.
-$contrats      = contrats_nounou($bdd, (int) $nounou['id']);
-$montant_total = total_contrats_nounou($bdd, (int) $nounou['id']);
+$tous_les_contrats = contrats_nounou($bdd, (int) $nounou['id']);
+$en_attente         = array_filter($tous_les_contrats, fn ($c) => $c['statut'] === 'en_attente');
+$autres_contrats    = array_filter($tous_les_contrats, fn ($c) => $c['statut'] !== 'en_attente');
+$contrats_actifs    = array_filter($tous_les_contrats, fn ($c) => $c['statut'] === 'acceptee');
+$montant_total       = total_contrats_nounou($bdd, (int) $nounou['id']);
+
+$libelles_statut = [
+    'acceptee' => ['Acceptée', 'badge-accent'],
+    'refusee'  => ['Refusée', 'badge'],
+    'terminee' => ['Terminée', 'badge'],
+];
 
 $derniers = $bdd->prepare(
     'SELECT m.expediteur_id, m.contenu, m.envoye_le, u.nom, u.prenom
@@ -34,70 +55,117 @@ $messages = $derniers->fetchAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tableau de bord nounou — <?= e(APP_NOM) ?></title>
     <link rel="stylesheet" href="assets/css/base.css">
+    <script src="assets/js/theme-init.js"></script>
     <link rel="stylesheet" href="assets/css/dashboard-nounou.css">
     <script src="assets/js/menu.js" defer></script>
 </head>
 <body>
-<header>
-    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="menu">☰ Menu</button>
-</header>
-<!-- Un seul menu. La page en affichait deux, identiques : un <nav> visible et
-     un .menu que la feuille de style masquait par display: none — si bien que
-     le bouton ☰ ne pouvait rien ouvrir. -->
-<nav class="menu" id="menu">
-    <ul>
-        <li><a href="index.php">Accueil</a></li>
-        <li><a href="logout.php">Déconnexion</a></li>
-    </ul>
-</nav>
+<div class="dash-shell">
+    <?= sidebar_html($bdd, (int) $moi['id'], $moi['role'], 'dashboard-nounou.php') ?>
+    <div class="dash-main">
+        <header class="dash-topbar">
+            <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="menu">☰</button>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <?= avatar_html($nounou['prenom'], $nounou['nom'], $nounou['photo_profil'], 'md') ?>
+                <div>
+                    <span class="eyebrow">Tableau de bord nounou</span>
+                    <h1 style="font-size:1.3rem;"><?= e($nounou['prenom'] . ' ' . $nounou['nom']) ?></h1>
+                </div>
+            </div>
+        </header>
 
-<div class="container">
-    <h2>Tableau de bord</h2>
+        <div class="dash-content">
+            <div class="cards-grid" style="margin-bottom:1.25rem;">
+                <div class="card" style="text-align:center;">
+                    <span class="eyebrow">Contrats en cours</span>
+                    <p style="font-size:1.8rem; font-weight:800;"><?= count($contrats_actifs) ?></p>
+                </div>
+                <div class="card" style="text-align:center;">
+                    <span class="eyebrow">Montant total</span>
+                    <p style="font-size:1.8rem; font-weight:800;"><?= number_format($montant_total, 0, ',', ' ') ?> FCFA</p>
+                </div>
+                <div class="card" style="text-align:center;">
+                    <span class="eyebrow">Tarif affiché</span>
+                    <p style="font-size:1.8rem; font-weight:800;"><?= number_format((float) $nounou['montant'], 0, ',', ' ') ?> FCFA</p>
+                    <p class="help-text">par <?= e($nounou['paiement']) ?></p>
+                </div>
+            </div>
 
-    <h3>Informations personnelles</h3>
-    <p>Nom : <?= e($nounou['prenom'] . ' ' . $nounou['nom']) ?></p>
-    <p>E-mail : <?= e($nounou['email']) ?></p>
-    <p>Ville : <?= e($nounou['ville']) ?></p>
-    <p>Service : <?= e($nounou['type_service']) ?></p>
-    <p>Tarif : <?= number_format((float) $nounou['montant'], 0, ',', ' ') ?> FCFA / <?= e($nounou['paiement']) ?></p>
+            <div class="card">
+                <h2 class="card-title">Informations personnelles</h2>
+                <p>E-mail : <?= e($nounou['email']) ?></p>
+                <p>Ville : <?= e($nounou['ville']) ?></p>
+                <p>Service : <?= e($nounou['type_service']) ?></p>
+                <p>Horaires : <?= e($nounou['horaires'] ?: 'non précisés') ?></p>
+            </div>
 
-    <h3>Contrats en cours</h3>
-    <?php if (!$contrats): ?>
-        <p>Aucun contrat en cours.</p>
-    <?php else: ?>
-        <ul>
-            <?php foreach ($contrats as $c): ?>
-                <li>
-                    <?= e($c['titre']) ?> —
-                    <?= number_format((float) $c['montant'], 0, ',', ' ') ?> FCFA
-                    (<?= e($c['parent_prenom'] . ' ' . $c['parent_nom']) ?>)
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    <?php endif; ?>
+            <?php if ($en_attente): ?>
+                <div class="card">
+                    <h2 class="card-title">Propositions en attente de réponse</h2>
+                    <?php foreach ($en_attente as $c): ?>
+                        <div class="card" style="box-shadow:none; background: var(--color-bg); margin-bottom:.75rem;">
+                            <strong><?= e($c['titre']) ?></strong>
+                            <p><?= number_format((float) $c['montant'], 0, ',', ' ') ?> FCFA — <?= e($c['parent_prenom'] . ' ' . $c['parent_nom']) ?></p>
+                            <form method="post" action="dashboard-nounou.php" style="display:flex; gap:.5rem; margin-top:.75rem;">
+                                <?= champ_csrf() ?>
+                                <input type="hidden" name="contrat_id" value="<?= (int) $c['id'] ?>">
+                                <button type="submit" name="reponse_contrat" value="accepter" class="btn btn-primary btn-sm">Accepter</button>
+                                <button type="submit" name="reponse_contrat" value="refuser" class="btn btn-outline btn-sm">Refuser</button>
+                            </form>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
 
-    <h3>Montant total</h3>
-    <p><?= number_format($montant_total, 0, ',', ' ') ?> FCFA</p>
+            <div class="card">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+                    <h2 class="card-title" style="margin-bottom:0;">Mes contrats</h2>
+                    <?php if ($tous_les_contrats): ?>
+                        <a href="export-contrats.php" class="btn btn-outline btn-sm">⬇ Exporter en CSV</a>
+                    <?php endif; ?>
+                </div>
+                <?php if (!$autres_contrats): ?>
+                    <div class="etat-vide"><p>Aucun contrat pour l'instant.</p></div>
+                <?php else: ?>
+                    <?php foreach ($autres_contrats as $c): ?>
+                        <?php [$libelle, $classe] = $libelles_statut[$c['statut']]; ?>
+                        <div class="card" style="box-shadow:none; background: var(--color-bg); margin-bottom:.75rem;">
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:.75rem; flex-wrap:wrap;">
+                                <div>
+                                    <strong><?= e($c['titre']) ?></strong>
+                                    <p><?= number_format((float) $c['montant'], 0, ',', ' ') ?> FCFA — <?= e($c['parent_prenom'] . ' ' . $c['parent_nom']) ?></p>
+                                </div>
+                                <span class="<?= $classe ?>"><?= e($libelle) ?></span>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
 
-    <h3>Messages reçus</h3>
-    <?php if (!$messages): ?>
-        <p>Aucun message reçu.</p>
-    <?php else: ?>
-        <ul>
-            <?php foreach ($messages as $m): ?>
-                <li>
-                    <strong><?= e($m['prenom'] . ' ' . $m['nom']) ?></strong> —
-                    <?= e($m['contenu']) ?>
-                    <a href="messages.php?avec=<?= (int) $m['expediteur_id'] ?>">Répondre</a>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    <?php endif; ?>
+            <div class="card">
+                <h2 class="card-title">Messages reçus</h2>
+                <?php if (!$messages): ?>
+                    <div class="etat-vide"><p>Aucun message reçu.</p></div>
+                <?php else: ?>
+                    <?php foreach ($messages as $m): ?>
+                        <div style="display:flex; align-items:center; gap:.75rem; padding:.75rem 0; border-bottom:1px solid var(--color-border);">
+                            <?= avatar_html($m['prenom'], $m['nom'], null, 'sm') ?>
+                            <div style="flex:1;">
+                                <strong><?= e($m['prenom'] . ' ' . $m['nom']) ?></strong>
+                                <p class="help-text" style="color:var(--color-text);"><?= e($m['contenu']) ?></p>
+                            </div>
+                            <a href="messages.php?avec=<?= (int) $m['expediteur_id'] ?>" class="btn btn-outline btn-sm">Répondre</a>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <footer class="site-footer">
+            <p><?= e(APP_NOM) ?> — trouvez la garde d'enfants qu'il vous faut.</p>
+            <p>&copy; 2024 <?= e(APP_NOM) ?>. Projet étudiant, à but non commercial.</p>
+        </footer>
+    </div>
 </div>
-
-<footer>
-    <p><?= e(APP_NOM) ?> — trouvez la garde d'enfants qu'il vous faut.</p>
-    <p>&copy; 2024 <?= e(APP_NOM) ?>. Projet étudiant, à but non commercial.</p>
-</footer>
 </body>
 </html>

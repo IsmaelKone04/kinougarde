@@ -1,10 +1,61 @@
-/* Socle commun à toutes les pages.
+/* Socle commun à toutes les pages — système de design de kiNouGarde.
  *
- * Chargé en premier, avant la feuille propre à chaque page. Il regroupe ce qui
- * était jusqu'ici recopié dans plusieurs fichiers — ou nulle part, comme les
- * messages d'erreur : les pages émettaient déjà class="erreur" sans qu'aucune
- * règle ne l'ait jamais défini.
+ * Chargé en premier, avant la feuille propre à chaque page. Regroupe les
+ * variables de couleur/espacement, la barre de navigation, les boutons, les
+ * champs de formulaire, les cartes et les avatars, pour que chaque page
+ * n'ait plus qu'à composer avec ces briques plutôt que de tout réinventer.
  */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+:root {
+    --color-primary:       #4f46e5;
+    --color-primary-dark:  #4338ca;
+    --color-primary-light: #eef2ff;
+    --color-accent:        #f97316;
+    --color-accent-dark:   #ea580c;
+    --color-success:       #16a34a;
+    --color-danger:        #dc2626;
+    --color-danger-bg:     #fef2f2;
+    --color-text:          #1e293b;
+    --color-text-muted:    #64748b;
+    --color-border:        #e2e8f0;
+    --color-surface:       #ffffff;
+    --color-bg:            #f1f5f9;
+
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+
+    --shadow-sm: 0 1px 3px rgba(15, 23, 42, .08);
+    --shadow-md: 0 8px 24px rgba(15, 23, 42, .10);
+    --shadow-lg: 0 20px 40px rgba(15, 23, 42, .16);
+
+    --font-sans: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+/* Mode sombre : uniquement les neutres (texte, fond, surfaces, bordures).
+   Les couleurs de marque/accent/succès/danger restent identiques — elles
+   sont déjà assez saturées pour rester lisibles sur un fond sombre, et les
+   repeindre risquerait de casser le contraste des badges (texte foncé sur
+   fond clair) ailleurs dans la feuille. */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --color-text:       #e5e7eb;
+        --color-text-muted: #94a3b8;
+        --color-border:     #334155;
+        --color-surface:    #1e293b;
+        --color-bg:         #0f172a;
+    }
+}
+
+:root[data-theme="dark"] {
+    --color-text:       #e5e7eb;
+    --color-text-muted: #94a3b8;
+    --color-border:     #334155;
+    --color-surface:    #1e293b;
+    --color-bg:         #0f172a;
+}
 
 *,
 *::before,
@@ -14,18 +65,38 @@
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
-    font-family: Arial, Helvetica, sans-serif;
-    line-height: 1.5;
-    color: #333;
-    /* Les feuilles d'origine pointaient toutes vers `style/pexel (2).jpg`,
-       une image absente du dépôt : le fond ne s'affichait jamais. */
-    background: linear-gradient(160deg, #1e3a5f 0%, #2f5d8c 55%, #4a7fb5 100%) fixed;
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    color: var(--color-text);
+    background: var(--color-bg);
     min-height: 100vh;
 }
 
+/* Pages « vitrine » (accueil, connexion, inscription) : dégradé de marque
+   plutôt que le fond neutre des pages applicatives. */
+body.marque {
+    background: radial-gradient(circle at 15% 0%, rgba(249, 115, 22, .35), transparent 45%),
+                linear-gradient(160deg, #1e3a5f 0%, #2f5d8c 55%, #4a7fb5 100%) fixed;
+}
+
+h1, h2, h3, h4 {
+    font-weight: 800;
+    color: var(--color-text);
+    line-height: 1.25;
+}
+
 a {
-    color: #007bff;
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
 }
 
 img {
@@ -33,18 +104,62 @@ img {
     height: auto;
 }
 
-/* --- Menu latéral, partagé par l'accueil et les deux tableaux de bord ----- */
+.eyebrow {
+    display: inline-block;
+    font-size: .78rem;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    margin-bottom: .4rem;
+}
+
+/* --- Barre de navigation --------------------------------------------- */
+
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .9rem 1.5rem;
+    background: rgba(255, 255, 255, .9);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-sm);
+}
+
+.brand {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    font-weight: 800;
+    font-size: 1.3rem;
+    color: var(--color-primary-dark);
+}
+
+.brand:hover {
+    text-decoration: none;
+}
+
+.brand-mark {
+    font-size: 1.5rem;
+}
+
+/* --- Menu : tiroir en mobile, barre horizontale à partir de 768px ----- */
 
 .menu {
     position: fixed;
     top: 0;
-    right: -250px;          /* hors écran par défaut */
-    width: 250px;
+    right: -280px;
+    width: 280px;
     height: 100%;
-    background-color: #333;
+    background: linear-gradient(180deg, #312e81 0%, #1e1b4b 100%);
     transition: right .3s ease;
     z-index: 1000;
-    padding-top: 60px;
+    padding-top: 76px;
+    box-shadow: var(--shadow-lg);
 }
 
 .menu.open {
@@ -56,42 +171,589 @@ img {
 }
 
 .menu ul li {
-    padding: 15px;
-    border-bottom: 1px solid #555;
-}
-
-.menu ul li:hover {
-    background-color: #555;
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
 }
 
 .menu ul li a,
 .menu ul li label {
+    display: block;
+    padding: 1rem 1.5rem;
     color: #fff;
+    font-weight: 700;
     text-decoration: none;
 }
 
+.menu ul li a:hover {
+    background: rgba(255, 255, 255, .08);
+}
+
 .menu-toggle {
-    display: block;
-    background-color: #333;
-    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
     border: none;
-    padding: 10px 20px;
-    font-size: 16px;
+    padding: .55rem 1rem;
+    border-radius: 999px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: .95rem;
     cursor: pointer;
 }
 
-/* --- Messages d'erreur --------------------------------------------------- */
+@media (min-width: 768px) {
+    .menu-toggle {
+        display: none;
+    }
+
+    .menu {
+        position: static;
+        width: auto;
+        height: auto;
+        background: transparent;
+        box-shadow: none;
+        padding-top: 0;
+    }
+
+    .menu ul {
+        display: flex;
+        align-items: center;
+        gap: .25rem;
+    }
+
+    .menu ul li {
+        border-bottom: none;
+    }
+
+    .menu ul li a,
+    .menu ul li label {
+        padding: .55rem 1rem;
+        border-radius: 999px;
+        color: var(--color-text);
+    }
+
+    .menu ul li a:hover {
+        background: var(--color-primary-light);
+        color: var(--color-primary-dark);
+    }
+
+    /* Le lien de déconnexion se distingue légèrement des liens de navigation. */
+    .menu ul li:last-child a {
+        color: var(--color-danger);
+    }
+
+    .menu ul li:last-child a:hover {
+        background: var(--color-danger-bg);
+    }
+}
+
+/* --- Coquille applicative : sidebar + contenu (pages connectées) -------- */
+
+.dash-shell {
+    display: flex;
+    align-items: flex-start;
+    min-height: 100vh;
+}
+
+.dash-sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 264px;
+    height: 100%;
+    background: var(--color-surface);
+    border-right: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem 1rem;
+    transition: left .25s ease;
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.dash-sidebar.open {
+    left: 0;
+    box-shadow: var(--shadow-lg);
+}
+
+.dash-sidebar .brand {
+    padding: .4rem .6rem 1.5rem;
+}
+
+.dash-nav {
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+    flex: 1;
+}
+
+.dash-nav-item {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    padding: .65rem .8rem;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    font-weight: 700;
+    font-size: .92rem;
+}
+
+.dash-nav-item:hover {
+    background: var(--color-bg);
+    color: var(--color-text);
+    text-decoration: none;
+}
+
+.dash-nav-item.active {
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+}
+
+.dash-nav-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.4rem;
+    height: 1.4rem;
+    padding: 0 .4rem;
+    border-radius: 999px;
+    background: var(--color-danger);
+    color: #fff;
+    font-size: .75rem;
+    font-weight: 800;
+    margin-left: auto;
+}
+
+.dash-nav-icon {
+    font-size: 1.05rem;
+    width: 1.4rem;
+    text-align: center;
+}
+
+.dash-nav-danger {
+    color: var(--color-danger);
+}
+
+.dash-nav-danger:hover {
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+}
+
+.dash-sidebar-footer {
+    border-top: 1px solid var(--color-border);
+    padding-top: .6rem;
+    margin-top: .6rem;
+}
+
+/* #theme-toggle est un <button>, pas un <a> : sans ce reset il garderait
+   la bordure/fond par défaut du navigateur au lieu de ressembler aux
+   autres liens de la sidebar. */
+.badge-verifiee {
+    display: inline-block;
+    font-size: .7rem;
+    font-weight: 700;
+    color: var(--color-success);
+    background: #dcfce7;
+    border-radius: var(--radius-sm);
+    padding: .15rem .5rem;
+    vertical-align: middle;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+#theme-toggle {
+    width: 100%;
+    border: none;
+    background: none;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+}
+
+.dash-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.dash-topbar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+}
+
+.dash-content {
+    flex: 1;
+    width: 100%;
+    max-width: 1000px;
+    padding: 1.75rem 1.5rem 2.5rem;
+}
+
+.dash-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, .45);
+    z-index: 999;
+}
+
+#menu.open + .dash-overlay {
+    display: block;
+}
+
+@media (min-width: 900px) {
+    .dash-sidebar {
+        position: sticky;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        transition: none;
+    }
+
+    .dash-topbar .menu-toggle {
+        display: none;
+    }
+
+    .dash-overlay {
+        display: none !important;
+    }
+}
+
+/* --- Boutons ------------------------------------------------------------ */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    padding: .8rem 1.6rem;
+    border-radius: 999px;
+    border: none;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: .95rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+
+.btn:hover {
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+.btn-primary {
+    background: var(--color-primary);
+    color: #fff;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+    background: var(--color-primary-dark);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-accent {
+    background: var(--color-accent);
+    color: #fff;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-accent:hover {
+    background: var(--color-accent-dark);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--color-primary);
+    color: var(--color-primary);
+    padding: calc(.8rem - 2px) calc(1.6rem - 2px);
+}
+
+.btn-outline:hover {
+    background: var(--color-primary-light);
+}
+
+.btn-ghost-light {
+    background: rgba(255, 255, 255, .15);
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, .55);
+    padding: calc(.8rem - 2px) calc(1.6rem - 2px);
+}
+
+.btn-ghost-light:hover {
+    background: rgba(255, 255, 255, .28);
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.btn-sm {
+    padding: .5rem 1.1rem;
+    font-size: .85rem;
+}
+
+/* --- Formulaires --------------------------------------------------------- */
+
+form {
+    font-family: inherit;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+    margin-bottom: 1.15rem;
+}
+
+label {
+    font-weight: 700;
+    font-size: .92rem;
+    color: var(--color-text);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+input[type="file"],
+select,
+textarea {
+    font-family: inherit;
+    font-size: 1rem;
+    width: 100%;
+    padding: .75rem .95rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: #fff;
+    color: var(--color-text);
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 6rem;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+/*
+ * :not(.btn) est nécessaire : sans lui, `button[type="submit"]` (un élément
+ * + un attribut) l'emporte en spécificité sur une simple classe comme
+ * `.btn-outline`, à cause du sélecteur d'élément `button`. Un bouton
+ * `<button type="submit" class="btn btn-outline">` (proposer/accepter un
+ * contrat, laisser un avis…) se retrouvait alors rempli en pleine largeur
+ * au lieu de respecter les classes .btn qu'il porte.
+ */
+input[type="submit"]:not(.btn),
+button[type="submit"]:not(.btn) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: .85rem 1.6rem;
+    margin-top: .35rem;
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color .15s ease, transform .15s ease;
+}
+
+input[type="submit"]:not(.btn):hover,
+button[type="submit"]:not(.btn):hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-1px);
+}
+
+.help-text {
+    font-size: .82rem;
+    color: var(--color-text-muted);
+}
+
+/* --- Cartes --------------------------------------------------------------- */
+
+.card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: 1.5rem;
+}
+
+.card + .card {
+    margin-top: 1.25rem;
+}
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.25rem;
+}
+
+.card-title {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+/* Carte centrée pour connexion / inscription. */
+.auth-shell {
+    min-height: calc(100vh - 76px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.25rem;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 440px;
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 2.25rem 2rem;
+}
+
+.auth-card.auth-card-wide {
+    max-width: 620px;
+}
+
+.auth-card h2 {
+    text-align: center;
+    margin-bottom: .35rem;
+}
+
+.auth-card > p {
+    text-align: center;
+    color: var(--color-text-muted);
+    margin-bottom: 1.5rem;
+}
+
+.field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 480px) {
+    .field-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 1.25rem;
+    color: var(--color-text-muted);
+    font-size: .92rem;
+}
+
+/* --- Avatars --------------------------------------------------------------- */
+
+.avatar {
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-weight: 800;
+    color: #fff;
+    text-transform: uppercase;
+    object-fit: cover;
+    background-position: center;
+}
+
+.avatar-sm { width: 42px;  height: 42px;  font-size: .85rem; }
+.avatar-md { width: 64px;  height: 64px;  font-size: 1.1rem; }
+.avatar-lg { width: 128px; height: 128px; font-size: 2.2rem; border: 4px solid #fff; box-shadow: var(--shadow-md); }
+
+/* --- Badges & étiquettes ----------------------------------------------------- */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .35rem .8rem;
+    border-radius: 999px;
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+    font-size: .82rem;
+    font-weight: 700;
+}
+
+.badge-accent {
+    background: #fff7ed;
+    color: var(--color-accent-dark);
+}
+
+/* --- Messages d'erreur ------------------------------------------------------ */
 
 .erreur {
-    background-color: #fdecea;
-    border-left: 4px solid #d93025;
-    color: #a32018;
-    padding: 12px 16px;
-    margin-bottom: 16px;
-    border-radius: 4px;
+    background-color: var(--color-danger-bg);
+    border-left: 4px solid var(--color-danger);
+    color: #991b1b;
+    padding: .9rem 1.1rem;
+    margin-bottom: 1.1rem;
+    border-radius: var(--radius-sm);
     list-style-position: inside;
+    font-weight: 600;
 }
 
 .erreur li + li {
     margin-top: 4px;
+}
+
+/* --- État vide --------------------------------------------------------------- */
+
+.etat-vide {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    color: var(--color-text-muted);
+    background: var(--color-primary-light);
+    border-radius: var(--radius-md);
+}
+
+/* --- Pied de page -------------------------------------------------------------- */
+
+.site-footer {
+    text-align: center;
+    padding: 2.25rem 1.25rem;
+    color: var(--color-text-muted);
+    font-size: .88rem;
+}
+
+.site-footer.site-footer-clair {
+    color: rgba(255, 255, 255, .8);
+}
+
+.site-footer p + p {
+    margin-top: .25rem;
 }

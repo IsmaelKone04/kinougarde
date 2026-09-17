@@ -21,6 +21,21 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// En-têtes de sécurité absents jusqu'ici : sans eux, une page tierce peut
+// embarquer le site dans une <iframe> (clickjacking), et un navigateur mal
+// configuré peut interpréter un fichier téléversé selon un type deviné
+// plutôt que celui déclaré.
+header('X-Frame-Options: DENY');
+header('X-Content-Type-Options: nosniff');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+
+// HSTS uniquement quand la requête est déjà en HTTPS : l'envoyer sur une
+// connexion HTTP (comme ce serveur de développement) forcerait le navigateur
+// à retenir une exigence HTTPS pour ce domaine sans que rien ne la serve.
+if (!empty($_SERVER['HTTPS'])) {
+    header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+}
+
 /**
  * Échappe une valeur avant affichage HTML.
  *
