@@ -1,0 +1,36 @@
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: kinougarde
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # Chargés une seule fois, à la création du volume : dans l'ordre
+      # alphabétique, donc schema.sql (0_) avant seed.sql (1_).
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/0_schema.sql:ro
+      - ./sql/seed.sql:/docker-entrypoint-initdb.d/1_seed.sql:ro
+    ports:
+      - "127.0.0.1:3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    environment:
+      DB_HOST: mysql
+      DB_NAME: kinougarde
+      DB_USER: root
+      DB_PASS: ""
+      APP_DEBUG: "true"
+    ports:
+      - "127.0.0.1:8010:8010"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
